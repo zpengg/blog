@@ -7,7 +7,7 @@ jobs:
       - name: Checkout Blog Branche
         uses: actions/checkout@v2
         with: 
-          ref: Blog
+          ref: hexo
       - name: Install Node.js 12
         uses: actions/setup-node@v1
         with:
