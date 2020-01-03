@@ -4,7 +4,7 @@
 
 # Site
 title: zpengg
-subtitle: ''
+subtitle: '好好吃饭，好好睡觉，好好照顾你自己'
 description: ''
 keywords:
 author: zpengg 
@@ -93,7 +93,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: hexo-theme-next
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
