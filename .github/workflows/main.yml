@@ -26,7 +26,9 @@ jobs:
         run: |
           npm i -g hexo-cli 
           npm i
+      - name: submodule theme next
+        run: |
+          git submodule update --init
       - name: Deploy Hexo
         run: |
-          hexo clean
           hexo g -d
