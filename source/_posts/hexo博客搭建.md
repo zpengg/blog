@@ -1,5 +1,5 @@
 ---
-title: hexo博客搭建.md
+title: hexo博客搭建
 tags:
   - 生活
   - 效率
