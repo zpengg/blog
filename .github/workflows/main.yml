@@ -28,4 +28,5 @@ jobs:
           npm i
       - name: Deploy Hexo
         run: |
+          hexo clean
           hexo g -d
