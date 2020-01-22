@@ -83,6 +83,6 @@ mv $tmp_file "$dir$img"
 echo "![]($remote_img)" | tee >(pbcopy)
 ```
 需要全局运行的话还可以需把脚本目录添加到PATH
-![测试图床](http://zpengg.oss-cn-shenzhen.aliyuncs.com/img/cf
-3b8.png)
+![测试图床](http://zpengg.oss-cn-shenzhen.aliyuncs.com/img/cf34786ffef143ce3b8c3de4927b33b8.png)
+
 目前使用上，感觉还可以压缩一下图片，日后再补。
