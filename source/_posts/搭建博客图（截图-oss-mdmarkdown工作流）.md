@@ -18,7 +18,7 @@ categories: 工具
 一类是左右分栏对比的
  - 各类编辑器自带/插件基本都提供了这种功能，看代码文档常用
  - CSDN 简书等 编辑器
- - 作业部落 
+ - 作业部落  
 基本提供了正常的展示。
 常见的还有**tag分类**、同步、**vim**等。
 同步的话，最初还想用git来实现，不过好像在公司这么个操作法还是
@@ -26,7 +26,7 @@ categories: 工具
 另一类是编写完立刻渲染, 所写即所见
  - Typora，使用流畅，最初
  - [MarkText](https://www.v2ex.com/t/464384) 比typora多了图床
- - 语雀, 这个做文档库感觉功能挺全的。
+ - 语雀, 这个做文档库感觉功能挺全的。 
 刚开始是有被惊艳到的，但是使用着发觉要用多一套快捷键。
 另外直接整理文件也是不太好的。使用tag分类会多维度一点，更为合
 综上，想找到一个满足以下条件的：
@@ -47,7 +47,8 @@ categories: 工具
 1. 截图
 2. 保存图片
 3. 已有图片上传
-4. 图片URL按MD的格式填入文章里。
+4. 图片URL按MD的格式填入文章里。 
+
 网上找到两个工具
 [pngpaste 仅限于mac](https://github.com/jcsalterego/pngpaste)
 可以保存截图，不过windows下无法用。brew 安装
@@ -56,6 +57,7 @@ brew install pngpaste
 python实现的,可以监听文件夹，上传增改的文件，使用了另一位开发
 pip install oss4blog
 oss4blog需要在～/oss4blog.cfg配置自己的阿里云子账户
+
 ```
 [config]
 Bucket = zpengg
@@ -82,7 +84,10 @@ remote_img="$remote_dir$img"
 mv $tmp_file "$dir$img"
 echo "![]($remote_img)" | tee >(pbcopy)
 ```
+
 需要全局运行的话还可以需把脚本目录添加到PATH
+
+发第一张图片试试
 ![测试图床](http://zpengg.oss-cn-shenzhen.aliyuncs.com/img/cf34786ffef143ce3b8c3de4927b33b8.png)
 
 目前使用上，感觉还可以压缩一下图片，日后再补。
