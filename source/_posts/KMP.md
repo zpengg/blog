@@ -1,7 +1,9 @@
 ---
 title: 3.1 Implement strStr() 
 date: 2020-02-17 21:03:12
-tags: leetcode, KMP
+tags:
+ - leetcode
+ - KMP
 categories: leetcode
 ---
 试图搞懂KMP算法的next数组
