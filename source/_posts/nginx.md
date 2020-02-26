@@ -1,10 +1,12 @@
 ---
 title: 前后端分离下，使用nginx部署前端
-tags: 
- - nginx
-categories: 
- - 网络
+tags:
+  - nginx
+categories:
+  - 网络
+date: 2020-02-26 10:00:18
 ---
+
 前后端分离下使用nginx 部署前端，转发请求到后端
  <!-- more -->
 ## 正向代理 反向代理
