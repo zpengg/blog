@@ -1,6 +1,7 @@
 ---
 title: the credentials flag is true
 date: 2020-03-24 23:17:02
+categories: 网络
 tags: 跨域
 ---
 
