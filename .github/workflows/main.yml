@@ -32,6 +32,3 @@ jobs:
       - name: Deploy Hexo
         run: |
           hexo g -d
-      - name: sitemap replace
-        run: |
-          sed -i "s/gitee/github/g" sitemap.xml
