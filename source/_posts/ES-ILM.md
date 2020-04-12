@@ -1,5 +1,5 @@
 ---
-title: ES时序数据（索引声明周期管理）
+title: ES时序数据（索引生命周期管理）
 copyright: true
 date: 2020-04-12 11:31:11
 tags: 
