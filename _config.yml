@@ -102,3 +102,9 @@ deploy:
   type: 'git'
   repository: git@github.com:zpengg/zpengg.github.io.git
   branch: master
+
+  
+sitemap:
+    path: sitemap.xml
+baidusitemap:
+    path: baidusitemap.xml
