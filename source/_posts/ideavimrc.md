@@ -70,6 +70,9 @@ HELP-> Edit Custom Properties ..
 keymap.windows.as.meta
 ```
 还是可以部分使用到原有的一些 文件导航等快捷键, 直接用就好了
+:set keep-english-in-normal-and-restore-in-insert
+是另一个插件IDEA vim extendion 的配置
+方便保证进入normal 模式时候 自动转换成 英文输入。
 
 ## 优点 & 缺点
 优点：
