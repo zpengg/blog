@@ -40,7 +40,7 @@ for(Iterator it = c.iterater(); it.hasNext(); )
 ## ArrayList
 
 三个常量, 给定默认值
-```
+```JAVA
 // 没指定容量的时候，默认容量
 private static final int DEFAULT_CAPACITY = 10;
 
@@ -54,7 +54,7 @@ private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
 两个变量
 elementData 存储数据
 size 存入数据的数量, 与capacity不一样
-```
+```JAVA
 //存放数据的容器
 transient Object[] elementData; // non-private to simplify nested class access
 
@@ -62,7 +62,7 @@ private int size;
 ```
 
 构造函数会用到默认的常量
-```
+```JAVA
 public ArrayList(int initialCapacity) {
     if (initialCapacity > 0) {
         //Object Array
@@ -101,7 +101,7 @@ public ArrayList(Collection<? extends E> c) {
 
 主要关注扩容，数据检查的一些方法。
 比如需要插入数据的时候，通常会`ensureCapacity`方法确保容量
-```
+```JAVA
 public void ensureCapacity(int minCapacity) {
     int minExpand = (elementData != DEFAULTCAPACITY_EMPTY_ELEMENTDATA)
         // any size if not default element table
@@ -138,7 +138,7 @@ private void ensureExplicitCapacity(int minCapacity) {
 
 最终判断需要扩容的话
 调用 grow(minCapacity);
-```
+```JAVA
 private void grow(int minCapacity) {
     // overflow-conscious code
     // 常规扩容 oldCapacity * 1.5
@@ -157,7 +157,7 @@ private void grow(int minCapacity) {
 minCapacity是需要达到的最小容量，与真正的扩展容量的大小是有区别的
 
 
-```
+```JAVA
 /**
  * The maximum size of array to allocate.
  * Some VMs reserve some header words in an array.
@@ -180,7 +180,7 @@ private static int hugeCapacity(int minCapacity) {
 但我的VM亲测设置为 `MAX_ARRAY_SIZE` 也没有问题。 再高就溢出了
 
 基于index 的访问方法会进行rangeCheck
-```
+```JAVA
 private void rangeCheck(int index) {
     if (index >= size)
         throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
@@ -197,15 +197,15 @@ private String outOfBoundsMsg(int index) {
 ```
 
 基于object 的则是主要用到equals 方法遍历去寻找元素
+```JAVA
+for (int i = 0; i < size; i++)      
+    if (o.equals(elementData[i]))
+        return i;
 ```
-    for (int i = 0; i < size; i++)
-if (o.equals(elementData[i]))
-    return i;
-    ```
 
-    修改数据需要通过复制数组实现，同时还会修改`modCount`
-    ```
-    public static native void arraycopy(Object src,  int  srcPos,
-            Object dest, int destPos,
-            int length);
+修改数据需要通过复制数组实现，同时还会修改`modCount`
+```
+public static native void arraycopy(Object src,  int  srcPos,
+        Object dest, int destPos,
+        int length);
 ```
