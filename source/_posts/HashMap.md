@@ -12,12 +12,15 @@ top:
 ---
 ## AbstractMap
 定义了 k-v pair, SimpleEntry和SimpleImmutableEntry
+![](http://zpengg.oss-cn-shenzhen.aliyuncs.com/img/34e0113823f3c50d030f7e175981106c.png)
 
-容器
+用以下容器存储K V 数据
+```
 Set<K> keySet
 Collection<V> values
-第一次调用时创建，非同步
+```
 
+`Map.Entry<K,V>` 描述两者的映射
 entrySet 则交给子类实现
 ```
 public abstract Set<Entry<K,V>> entrySet();
