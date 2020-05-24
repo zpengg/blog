@@ -2,8 +2,12 @@
 title: Java 数据结构源码 - ArrayList
 copyright: true
 date: 2020-05-06 20:46:15
-tags: JAVA源码
-categories: JAVA源码
+tags:
+- JAVA源码
+- 数据结构
+categories:
+- JAVA源码
+- 数据结构
 top:
 ---
 

@@ -1,7 +1,10 @@
 ---
 title: ssh 初探
-tags: 计算机基础知识
-categories: other
+tags:
+- 网络
+- 安全
+categories:
+- 网络
 date: 2020-01-18 11:37:17
 ---
 
