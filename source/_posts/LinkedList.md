@@ -38,6 +38,7 @@ LinkedList 内部的节点修改
 - 从头
 - 从尾
 - 从某节点前插入
+
 ```JAVA
 /**
  * Links e as first element.
@@ -89,7 +90,8 @@ void linkBefore(E e, Node<E> succ) {
 - 从头
 - 从尾
 - 删除中间节点，关联前后节点，有必要还更新头尾节点引用
-```
+
+```JAVA
 /**
  * Unlinks non-null first node f.
  */
@@ -206,7 +208,7 @@ E unlink(Node<E> x) {
     }
 
 ```
-## 环状
+### 环状
 ```JAVA
     public void addFirst(E e) {
         if (e == null)
@@ -229,7 +231,7 @@ E unlink(Node<E> x) {
 head == tail 的情况就相当于整个环已经满了。
 这样可以高效利用已分配的空间。
 
-## 扩容
+### 扩容
 扩容相对于ArrayList来说简单一点，满了直接DoubleCapacity。
 ```JAVA
 public void addFirst(E e) {
