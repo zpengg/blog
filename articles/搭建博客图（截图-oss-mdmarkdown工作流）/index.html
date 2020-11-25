@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="YNxNVpKWrrhCO5lB_GKkkz6TxbryIsqJHibxrzo9Amc" />
+
+
+
+  <meta name="baidu-site-verification" content="NaN" />
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="cMbiWs0H2C" />
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="工具,Markdown,图床,博客搭建," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="markdwon写字工具选择及图床搭建。 打造键盘流截图上传云存储返回链接的顺畅书写体验。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="搭建博客图床（截图，同步云存储，返回markdown链接）">
+<meta property="og:url" content="https://zpengg.github.io/articles/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E5%9B%BE%EF%BC%88%E6%88%AA%E5%9B%BE-oss-mdmarkdown%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%89/index.html">
+<meta property="og:site_name" content="zpengg">
+<meta property="og:description" content="markdwon写字工具选择及图床搭建。 打造键盘流截图上传云存储返回链接的顺畅书写体验。">
+<meta property="og:image" content="http://zpengg.oss-cn-shenzhen.aliyuncs.com/img/cf34786ffef143ce3b8c3de4927b33b8.png">
+<meta property="article:published_time" content="2020-01-23T23:05:04.000Z">
+<meta property="article:modified_time" content="2020-11-25T02:46:59.974Z">
+<meta property="article:author" content="zpengg">
+<meta property="article:tag" content="工具">
+<meta property="article:tag" content="Markdown">
+<meta property="article:tag" content="图床">
+<meta property="article:tag" content="博客搭建">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zpengg.oss-cn-shenzhen.aliyuncs.com/img/cf34786ffef143ce3b8c3de4927b33b8.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://zpengg.github.io/articles/搭建博客图（截图-oss-mdmarkdown工作流）/"/>
+
+
+
+
+
+  <title>搭建博客图床（截图，同步云存储，返回markdown链接） | zpengg</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zpengg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">🔑 stuff i used to do 🔑</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://zpengg.github.io/articles/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E5%9B%BE%EF%BC%88%E6%88%AA%E5%9B%BE-oss-mdmarkdown%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zpengg">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zpengg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">搭建博客图床（截图，同步云存储，返回markdown链接）</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-23T23:05:04+00:00">
+                2020-01-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index">
+                    <span itemprop="name">工具</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/articles/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E5%9B%BE%EF%BC%88%E6%88%AA%E5%9B%BE-oss-mdmarkdown%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%89/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/articles/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E5%9B%BE%EF%BC%88%E6%88%AA%E5%9B%BE-oss-mdmarkdown%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%89/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/articles/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E5%9B%BE%EF%BC%88%E6%88%AA%E5%9B%BE-oss-mdmarkdown%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%89/" class="leancloud_visitors" data-flag-title="搭建博客图床（截图，同步云存储，返回markdown链接）">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  848
+                </span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>markdwon写字工具选择及图床搭建。</p>
+<p>打造键盘流截图上传云存储返回链接的顺畅书写体验。</p>
+ <a id="more"></a>
+<h2 id="MarkDown-写字工具使用历程"><a href="#MarkDown-写字工具使用历程" class="headerlink" title="MarkDown 写字工具使用历程"></a>MarkDown 写字工具使用历程</h2><h4 id="笔记软件"><a href="#笔记软件" class="headerlink" title="笔记软件"></a>笔记软件</h4><p>最早是在笔记软件上做笔记的。笔记工具提供了较好的<strong>整理&amp;同步</strong>功能，网易云笔记提供了富文本和md模式，但以前用富文本编辑的笔记，感觉跟自己手写的一样，有点难看。写了也不太方便回顾。另外通常笔记软件导出也不太方便。</p>
+<h4 id="编辑器"><a href="#编辑器" class="headerlink" title="编辑器"></a>编辑器</h4><p>常见有两类<br>一类是左右分栏对比的</p>
+<ul>
+<li>各类编辑器自带/插件基本都提供了这种功能，看代码文档常用</li>
+<li>CSDN 简书等 编辑器</li>
+<li>作业部落 </li>
+</ul>
+<p>基本提供了正常的展示。<br>常见的还有<strong>tag分类</strong>、同步、<strong>vim</strong>等。<br>同步的话，最初还想用git来实现，不过好像在公司这么个操作法还是不太好。<br>博客网站的话相当于自带<strong>图床</strong>了，但是不同网站之间图片访问又常用限制。</p>
+<p>另一类是编写完立刻渲染, 所写即所见</p>
+<ul>
+<li>Typora，使用流畅，最初</li>
+<li><a href="https://www.v2ex.com/t/464384" target="_blank" rel="noopener">MarkText</a> 比typora多了图床功能，感觉流畅性弱点</li>
+<li>语雀, 这个做文档库感觉功能挺全的。</li>
+</ul>
+<p>刚开始是有被惊艳到的，但是使用着发觉要用多一套快捷键。<br>另外直接整理文件也是不太好的。使用tag分类会多维度一点，更为合理。</p>
+<p>综上，想找到一个满足以下条件的：</p>
+<ul>
+<li>多维度整理分类</li>
+<li>编辑体验一致性 （最好是VIM）</li>
+<li>共用一套图床</li>
+<li>同步</li>
+<li>流畅</li>
+</ul>
+<p>后来，发觉hexo 的博客搭了之后，文档整理，同步等功能基本解决。<br>然后编辑使用 VIM 和 作业部落 也基本解决。</p>
+<p>至此，剩下的就是图床问题了。</p>
+<h2 id="图床搭建"><a href="#图床搭建" class="headerlink" title="图床搭建"></a>图床搭建</h2><p>考虑到要访问不受限制，最好还是搭建自己的图床。</p>
+<ul>
+<li><a href="https://www.v2ex.com/t/182703" target="_blank" rel="noopener">sm.ms</a>marktext也是用的这个。</li>
+<li>各类云服务的对象存储。最后精打细算挑了阿里云9块一年。个人流量不多，基本就是资源包9块</li>
+</ul>
+<p>日常写字，使用图片的流程，基本就是以下步骤：</p>
+<ol>
+<li>截图</li>
+<li>保存图片</li>
+<li>已有图片上传</li>
+<li>图片URL按MD的格式填入文章里。</li>
+</ol>
+<p>网上找到两个工具<br><a href="https://github.com/jcsalterego/pngpaste" target="_blank" rel="noopener">pngpaste 仅限于mac</a><br>可以保存截图，不过windows下无法用。brew 安装<br>brew install pngpaste</p>
+<p><a href="https://github.com/wzyuliyang/qiniu4blog" target="_blank" rel="noopener">qiniu4blog</a><br>python实现的,可以监听文件夹，上传增改的文件，使用了另一位开发的oss4blog<br>pip install oss4blog</p>
+<p>oss4blog需要在～/oss4blog.cfg配置自己的阿里云子账户</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[config]</span><br><span class="line">Bucket &#x3D; zpengg</span><br><span class="line">AccessKeyId &#x3D; lLLLLLLLLLLLLLLlllllllll</span><br><span class="line">AccessKeySecret &#x3D; 6888888888888888888888888888m3</span><br><span class="line">PathToWatch &#x3D; &#x2F;Users&#x2F;***&#x2F;DDDDDDDDD&#x2F;llll&#x2F;image</span><br><span class="line">Endpoint &#x3D; oss-cn-shenzhen.aliyuncs.com</span><br><span class="line">SubPath &#x3D; img&#x2F;</span><br><span class="line">[custom_url]</span><br><span class="line">Enable &#x3D; false</span><br><span class="line">CustomUrl &#x3D; custom</span><br></pre></td></tr></table></figure>
+<p>SubPath是自己找源文件加的，把这些截图统一放img/下。</p>
+<p>再创建一个脚本simg.sh，需要保存截图的时候运行一下。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/bin/bash -eu</span></span><br><span class="line">dir=<span class="string">" /Users/***/DDDDDDDDD/llll/image"</span></span><br><span class="line">remote_dir=<span class="string">"http://zpengg.oss-cn-shenzhen.aliyuncs.com/img"</span></span><br><span class="line">tmp_file=$(mktemp)</span><br><span class="line">pngpaste <span class="variable">$tmp_file</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">hash</span>=$(md5 &lt; <span class="variable">$tmp_file</span>)</span><br><span class="line">img=<span class="string">"/<span class="variable">$hash</span>.png"</span></span><br><span class="line">remote_img=<span class="string">"<span class="variable">$remote_dir</span><span class="variable">$img</span>"</span></span><br><span class="line">mv <span class="variable">$tmp_file</span> <span class="string">"<span class="variable">$dir</span><span class="variable">$img</span>"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"![](<span class="variable">$remote_img</span>)"</span> | tee &gt;(pbcopy)</span><br></pre></td></tr></table></figure>
+<p>需要全局运行的话还可以需把脚本目录添加到PATH</p>
+<p>随手截一张看看效果如何:<br><img src="http://zpengg.oss-cn-shenzhen.aliyuncs.com/img/cf34786ffef143ce3b8c3de4927b33b8.png" alt="测试图床"></p>
+<p>目前使用上，感觉还可以<strong>压缩</strong>一下图片，日后再补。</p>
+
+      
+    </div>
+    
+    
+    
+    
+      <div>
+        
+
+      </div>
+    
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag"># 工具</a>
+          
+            <a href="/tags/Markdown/" rel="tag"># Markdown</a>
+          
+            <a href="/tags/%E5%9B%BE%E5%BA%8A/" rel="tag"># 图床</a>
+          
+            <a href="/tags/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/" rel="tag"># 博客搭建</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/articles/SpiralMatrix/" rel="next" title="Spiral Matrix">
+                <i class="fa fa-chevron-left"></i> Spiral Matrix
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/articles/IP%E5%9C%B0%E5%9D%80%E5%88%86%E7%B1%BB/" rel="prev" title="IP地址分类">
+                IP地址分类 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">zpengg</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MarkDown-写字工具使用历程"><span class="nav-number">1.</span> <span class="nav-text">MarkDown 写字工具使用历程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#笔记软件"><span class="nav-number">1.0.1.</span> <span class="nav-text">笔记软件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编辑器"><span class="nav-number">1.0.2.</span> <span class="nav-text">编辑器</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图床搭建"><span class="nav-number">2.</span> <span class="nav-text">图床搭建</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zpengg</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i>
+<span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'WqwIUMfdRmXmdQvL3LOx1RKd-gzGzoHsz',
+        appKey: '84WOyea0KjdcqaO4zacQYgYH',
+        placeholder: '交流一下吧，最好填上昵称。。',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("WqwIUMfdRmXmdQvL3LOx1RKd-gzGzoHsz", "84WOyea0KjdcqaO4zacQYgYH");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="YNxNVpKWrrhCO5lB_GKkkz6TxbryIsqJHibxrzo9Amc" />
+
+
+
+  <meta name="baidu-site-verification" content="NaN" />
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="cMbiWs0H2C" />
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="JAVA源码,数据结构," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="AbstractMap定义了 k-v pair, SimpleEntry和SimpleImmutableEntry 用以下容器存储K V 数据 12Set&lt;K&gt; keySetCollection&lt;V&gt; values  Map.Entry&lt;K,V&gt; 描述两者的映射entrySet 则交给子类实现 1public abstract Set&lt;Entry&lt;K">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 数据结构源码 - HashMap">
+<meta property="og:url" content="https://zpengg.github.io/articles/HashMap/index.html">
+<meta property="og:site_name" content="zpengg">
+<meta property="og:description" content="AbstractMap定义了 k-v pair, SimpleEntry和SimpleImmutableEntry 用以下容器存储K V 数据 12Set&lt;K&gt; keySetCollection&lt;V&gt; values  Map.Entry&lt;K,V&gt; 描述两者的映射entrySet 则交给子类实现 1public abstract Set&lt;Entry&lt;K">
+<meta property="og:image" content="http://zpengg.oss-cn-shenzhen.aliyuncs.com/img/34e0113823f3c50d030f7e175981106c.png">
+<meta property="og:image" content="http://zpengg.oss-cn-shenzhen.aliyuncs.com/img/c1486e4b84d176b08f13429b383dd33e.png">
+<meta property="article:published_time" content="2020-05-11T20:27:44.000Z">
+<meta property="article:modified_time" content="2020-11-25T02:46:59.970Z">
+<meta property="article:author" content="zpengg">
+<meta property="article:tag" content="JAVA源码">
+<meta property="article:tag" content="数据结构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zpengg.oss-cn-shenzhen.aliyuncs.com/img/34e0113823f3c50d030f7e175981106c.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://zpengg.github.io/articles/HashMap/"/>
+
+
+
+
+
+  <title>Java 数据结构源码 - HashMap | zpengg</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zpengg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">🔑 stuff i used to do 🔑</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://zpengg.github.io/articles/HashMap/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zpengg">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zpengg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Java 数据结构源码 - HashMap</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-11T20:27:44+00:00">
+                2020-05-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JAVA%E6%BA%90%E7%A0%81/" itemprop="url" rel="index">
+                    <span itemprop="name">JAVA源码</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JAVA%E6%BA%90%E7%A0%81/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url" rel="index">
+                    <span itemprop="name">数据结构</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/articles/HashMap/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/articles/HashMap/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/articles/HashMap/" class="leancloud_visitors" data-flag-title="Java 数据结构源码 - HashMap">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.9k
+                </span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="AbstractMap"><a href="#AbstractMap" class="headerlink" title="AbstractMap"></a>AbstractMap</h2><p>定义了 k-v pair, SimpleEntry和SimpleImmutableEntry<br><img src="http://zpengg.oss-cn-shenzhen.aliyuncs.com/img/34e0113823f3c50d030f7e175981106c.png" alt=""></p>
+<p>用以下容器存储K V 数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;K&gt; keySet</span><br><span class="line">Collection&lt;V&gt; values</span><br></pre></td></tr></table></figure>
+
+<p><code>Map.Entry&lt;K,V&gt;</code> 描述两者的映射<br>entrySet 则交给子类实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public abstract Set&lt;Entry&lt;K,V&gt;&gt; entrySet();</span><br></pre></td></tr></table></figure>
+
+<h2 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h2><h3 id="默认值"><a href="#默认值" class="headerlink" title="默认值"></a>默认值</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">static final int DEFAULT_INITIAL_CAPACITY &#x3D; 1 &lt;&lt; 4; &#x2F;&#x2F; aka 16</span><br><span class="line"></span><br><span class="line">static final int MAXIMUM_CAPACITY &#x3D; 1 &lt;&lt; 30;</span><br><span class="line"></span><br><span class="line">static final float DEFAULT_LOAD_FACTOR &#x3D; 0.75f;</span><br><span class="line"></span><br><span class="line">static final int TREEIFY_THRESHOLD &#x3D; 8; &#x2F;&#x2F; 链表节点数树化阈值</span><br><span class="line"></span><br><span class="line">static final int UNTREEIFY_THRESHOLD &#x3D; 6; &#x2F;&#x2F; 取消树化阈值</span><br><span class="line"></span><br><span class="line">static final int MIN_TREEIFY_CAPACITY &#x3D; 64;</span><br></pre></td></tr></table></figure>
+<h3 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h3><p>数组 -&gt; 链表 -&gt; 红黑树的结构<br>此处应有图</p>
+<p>存放数据的链表节点由内部类Node来表示</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Node</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Map</span>.<span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt;</span>&#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">int</span> hash;</span><br><span class="line">    <span class="keyword">final</span> K key;</span><br><span class="line">    V value;</span><br><span class="line">    Node&lt;K,V&gt; next;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="hash值-计算"><a href="#hash值-计算" class="headerlink" title="hash值 计算"></a>hash值 计算</h4><p>hash 值是 key.hashCode 异或xor 自身高16位</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h;</span><br><span class="line">    <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>至于hash值怎么用，可以配合 get/put 方法食用, (可参考下一段代码 put相关方法)。<br>可以追溯到<code>n = tab.length</code>、<code>first = tab[(n - 1) &amp; hash]</code> 中的索引<code>(n - 1) &amp; hash</code><br>(n-1)后bit全为1，hash值做mask掩码（像子网那样）<br>然后再看回前边为高16位异或。相当于融合了高低位的信息，减少低位一样时这种掩码导致的冲突。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">public V put(K key, V value) &#123;</span><br><span class="line">    return putVal(hash(key), key, value, false, true);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,</span><br><span class="line">                   boolean evict) &#123;</span><br><span class="line">        Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; int n, i;</span><br><span class="line">        if ((tab &#x3D; table) &#x3D;&#x3D; null || (n &#x3D; tab.length) &#x3D;&#x3D; 0)</span><br><span class="line">            &#x2F;&#x2F; 初始化 tab 数组</span><br><span class="line">            n &#x3D; (tab &#x3D; resize()).length;</span><br><span class="line">        if ((p &#x3D; tab[i &#x3D; (n - 1) &amp; hash]) &#x3D;&#x3D; null)</span><br><span class="line">            &#x2F;&#x2F; tab[i] &#x3D;&#x3D; null  插入 tab[i] 位置</span><br><span class="line">            tab[i] &#x3D; newNode(hash, key, value, null);</span><br><span class="line">        else &#123; &#x2F;&#x2F; tab[i] !&#x3D; null  插入 tab[i] 位置</span><br><span class="line">            Node&lt;K,V&gt; e; K k;</span><br><span class="line">            if (p.hash &#x3D;&#x3D; hash &amp;&amp;</span><br><span class="line">                ((k &#x3D; p.key) &#x3D;&#x3D; key || (key !&#x3D; null &amp;&amp; key.equals(k))))</span><br><span class="line">                &#x2F;&#x2F; tab[i] 的 头&#x2F;根节点</span><br><span class="line">                e &#x3D; p;</span><br><span class="line">            else if (p instanceof TreeNode) &#x2F;&#x2F; 按树的方式找</span><br><span class="line">                e &#x3D; ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value);</span><br><span class="line">            else &#123; &#x2F;&#x2F; 按链表的方式找</span><br><span class="line">                for (int binCount &#x3D; 0; ; ++binCount) &#123;</span><br><span class="line">                    if ((e &#x3D; p.next) &#x3D;&#x3D; null) &#123;</span><br><span class="line">                        &#x2F;&#x2F; 找不到节点 在链表最后插入</span><br><span class="line">                        p.next &#x3D; newNode(hash, key, value, null);</span><br><span class="line">                        &#x2F;&#x2F; 检查是否需要树化</span><br><span class="line">                        if (binCount &gt;&#x3D; TREEIFY_THRESHOLD - 1) &#x2F;&#x2F; -1 for 1st</span><br><span class="line">                            treeifyBin(tab, hash);</span><br><span class="line">                        break;</span><br><span class="line">                    &#125;</span><br><span class="line">                    if (e.hash &#x3D;&#x3D; hash &amp;&amp;</span><br><span class="line">                        ((k &#x3D; e.key) &#x3D;&#x3D; key || (key !&#x3D; null &amp;&amp; key.equals(k))))</span><br><span class="line">                        &#x2F;&#x2F; 节点在链表中已存在</span><br><span class="line">                        break;</span><br><span class="line">                    p &#x3D; e;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            if (e !&#x3D; null) &#123; &#x2F;&#x2F; existing mapping for key</span><br><span class="line">                V oldValue &#x3D; e.value;</span><br><span class="line">                if (!onlyIfAbsent || oldValue &#x3D;&#x3D; null)</span><br><span class="line">                    e.value &#x3D; value;</span><br><span class="line">                afterNodeAccess(e);</span><br><span class="line">                return oldValue;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        ++modCount;</span><br><span class="line">        if (++size &gt; threshold)</span><br><span class="line">            resize();</span><br><span class="line">        afterNodeInsertion(evict);</span><br><span class="line">        return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>数量少的时候是链表<br>多的时候会进行树化,<br>数化的时候Node会转换成另一个类TreeNode</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">static final class TreeNode&lt;K,V&gt; extends LinkedHashMap.Entry&lt;K,V&gt; &#123;</span><br><span class="line">    TreeNode&lt;K,V&gt; parent;  &#x2F;&#x2F; red-black tree links</span><br><span class="line">    TreeNode&lt;K,V&gt; left;</span><br><span class="line">    TreeNode&lt;K,V&gt; right;</span><br><span class="line">    TreeNode&lt;K,V&gt; prev;    &#x2F;&#x2F; needed to unlink next upon deletion</span><br><span class="line">    boolean red;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>红黑树细节的话后面详谈</p>
+<h2 id="resize-扩容"><a href="#resize-扩容" class="headerlink" title="resize 扩容"></a>resize 扩容</h2><p>先看看容量有关的几个关键概念<br>loadFactor 负载因子 必须<br>threshold = capacity * loadFactor 扩容阈值 or 初始化成initCapacity最近的2的幂</p>
+<p>size 键值对数量<br>capacity 桶数组大小 默认16，非默认根据threshold lazy init</p>
+<p>前边提到数组是这样一个形式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">transient Node&lt;K,V&gt;[] table;</span><br></pre></td></tr></table></figure>
+<p>table的一个slot中存放的是hash 相同的元素（hash冲突）</p>
+<h3 id="处理单个节点"><a href="#处理单个节点" class="headerlink" title="处理单个节点"></a>处理单个节点</h3><p><code>newTab[e.hash &amp; (newCap - 1)] = e;</code> 直接按新容量重新定位</p>
+<h3 id="处理链表"><a href="#处理链表" class="headerlink" title="处理链表"></a>处理链表</h3><p>前文坐标计算 <code>(n-1) &amp; hash</code><br>扩容前oldCap为16<br>0000 1111 mask = 15<br>0000 0101 hash1<br>0001 0101 hash2</p>
+<p>链表可以根据<code>e.hash &amp; oldCap == 0</code>恰好分成低两组<br>0001 0000 oldCap = 16<br>0000 0101 hash1 -&gt; low<br>0001 0101 hash2 -&gt; high</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Node&lt;K,V&gt; loHead &#x3D; null, loTail &#x3D; null;</span><br><span class="line">Node&lt;K,V&gt; hiHead &#x3D; null, hiTail &#x3D; null;</span><br></pre></td></tr></table></figure>
+<h3 id="处理树"><a href="#处理树" class="headerlink" title="处理树"></a>处理树</h3><p>split方法，按上面方法分成两个链表再看判断 treeify/untreeify<br>untreeify的话,本身是链表了,主要还是节点的转换</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">final Node&lt;K,V&gt; untreeify(HashMap&lt;K,V&gt; map) &#123;</span><br><span class="line">           Node&lt;K,V&gt; hd &#x3D; null, tl &#x3D; null;</span><br><span class="line">           for (Node&lt;K,V&gt; q &#x3D; this; q !&#x3D; null; q &#x3D; q.next) &#123;</span><br><span class="line">               Node&lt;K,V&gt; p &#x3D; map.replacementNode(q, null);</span><br><span class="line">               if (tl &#x3D;&#x3D; null)</span><br><span class="line">                   hd &#x3D; p;</span><br><span class="line">               else</span><br><span class="line">                   tl.next &#x3D; p;</span><br><span class="line">               tl &#x3D; p;</span><br><span class="line">           &#125;</span><br><span class="line">           return hd;</span><br><span class="line">       &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2的幂"><a href="#2的幂" class="headerlink" title="2的幂"></a>2的幂</h3><p>这里可以看到size取2的幂是有原因的<br>另外初始门限也有个比较有趣的函数，作用是获得最近的2的幂</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">static final int tableSizeFor(int cap) &#123;</span><br><span class="line">    int n &#x3D; cap - 1;</span><br><span class="line">    n |&#x3D; n &gt;&gt;&gt; 1;</span><br><span class="line">    n |&#x3D; n &gt;&gt;&gt; 2;</span><br><span class="line">    n |&#x3D; n &gt;&gt;&gt; 4;</span><br><span class="line">    n |&#x3D; n &gt;&gt;&gt; 8;</span><br><span class="line">    n |&#x3D; n &gt;&gt;&gt; 16;</span><br><span class="line">    return (n &lt; 0) ? 1 : (n &gt;&#x3D; MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>2的幂是某一位是1其余都是0<br>-1后，最高位置为1，然后移位后按位或则是将次高位后全都置的1<br>再加1则会进位成2的幂。</p>
+<h2 id="treeify"><a href="#treeify" class="headerlink" title="treeify"></a>treeify</h2><p>先了解下红黑树的基本性质</p>
+<ul>
+<li>节点分红/黑色 boolean red</li>
+<li>根节点 黑色</li>
+<li>红子节点的子节点黑色。</li>
+<li>每个叶节点（NIL节点 无数据） 是黑色</li>
+<li>root到NIL的黑色节点数目相同</li>
+</ul>
+<p>前文提到的TreeNode节点继承LinkedHashMap.Entry&lt;K,V&gt;<br><img src="http://zpengg.oss-cn-shenzhen.aliyuncs.com/img/c1486e4b84d176b08f13429b383dd33e.png" alt=""></p>
+<p>在两个类绕来绕去，和HashMap在1.8进行了树化改进有关系。历史原因。</p>
+<p>treeify</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">final void treeify(Node&lt;K,V&gt;[] tab) &#123;</span><br><span class="line">    TreeNode&lt;K,V&gt; root &#x3D; null;</span><br><span class="line">    for (TreeNode&lt;K,V&gt; x &#x3D; this, next; x !&#x3D; null; x &#x3D; next) &#123;</span><br><span class="line">        next &#x3D; (TreeNode&lt;K,V&gt;)x.next;</span><br><span class="line">        x.left &#x3D; x.right &#x3D; null;</span><br><span class="line">        &#x2F;&#x2F; 设置为根</span><br><span class="line">        if (root &#x3D;&#x3D; null) &#123;</span><br><span class="line">            x.parent &#x3D; null;</span><br><span class="line">            x.red &#x3D; false;</span><br><span class="line">            root &#x3D; x;</span><br><span class="line">        &#125;</span><br><span class="line">        else &#123;</span><br><span class="line">            K k &#x3D; x.key;</span><br><span class="line">            int h &#x3D; x.hash;</span><br><span class="line">            Class&lt;?&gt; kc &#x3D; null;</span><br><span class="line">            for (TreeNode&lt;K,V&gt; p &#x3D; root;;) &#123;</span><br><span class="line">                int dir, ph;</span><br><span class="line">                K pk &#x3D; p.key;</span><br><span class="line">                if ((ph &#x3D; p.hash) &gt; h)</span><br><span class="line">                    dir &#x3D; -1;</span><br><span class="line">                else if (ph &lt; h)</span><br><span class="line">                    dir &#x3D; 1;</span><br><span class="line">                else if ((kc &#x3D;&#x3D; null &amp;&amp;  &#x2F;&#x2F; key 为null</span><br><span class="line">                          (kc &#x3D; comparableClassFor(k)) &#x3D;&#x3D; null) ||</span><br><span class="line">                         (dir &#x3D; compareComparables(kc, k, pk)) &#x3D;&#x3D; 0) &#x2F;&#x2F;class 类型不为null，但比较了还是相等</span><br><span class="line">                    dir &#x3D; tieBreakOrder(k, pk); &#x2F;&#x2F;</span><br><span class="line">                &#x2F;&#x2F; 得出dir 插入位置</span><br><span class="line">                TreeNode&lt;K,V&gt; xp &#x3D; p;</span><br><span class="line">                if ((p &#x3D; (dir &lt;&#x3D; 0) ? p.left : p.right) &#x3D;&#x3D; null) &#123;</span><br><span class="line">                    x.parent &#x3D; xp;</span><br><span class="line">                    if (dir &lt;&#x3D; 0)</span><br><span class="line">                        xp.left &#x3D; x;</span><br><span class="line">                    else</span><br><span class="line">                        xp.right &#x3D; x;</span><br><span class="line">                    root &#x3D; balanceInsertion(root, x);</span><br><span class="line">                    break;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    moveRootToFront(tab, root);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>balanceInsertion 平衡插入后的节点</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">static &lt;K,V&gt; TreeNode&lt;K,V&gt; balanceInsertion(TreeNode&lt;K,V&gt; root,</span><br><span class="line">                                                    TreeNode&lt;K,V&gt; x) &#123;</span><br><span class="line">    x.red &#x3D; true;</span><br><span class="line">    for (TreeNode&lt;K,V&gt; xp, xpp, xppl, xppr;;) &#123;</span><br><span class="line">        &#x2F;&#x2F; 自底向上调整</span><br><span class="line">        if ((xp &#x3D; x.parent) &#x3D;&#x3D; null) &#123;</span><br><span class="line">            x.red &#x3D; false;</span><br><span class="line">            return x;</span><br><span class="line">        &#125;</span><br><span class="line">        else if (!xp.red || (xpp &#x3D; xp.parent) &#x3D;&#x3D; null)</span><br><span class="line">            return root; &#x2F;&#x2F; 循环出口</span><br><span class="line">        if (xp &#x3D;&#x3D; (xppl &#x3D; xpp.left)) &#123;</span><br><span class="line">            if ((xppr &#x3D; xpp.right) !&#x3D; null &amp;&amp; xppr.red) &#123;</span><br><span class="line">                &#x2F;&#x2F; xxpr 存在 and 为红色</span><br><span class="line">                xppr.red &#x3D; false;</span><br><span class="line">                xp.red &#x3D; false;</span><br><span class="line">                xpp.red &#x3D; true;</span><br><span class="line">                x &#x3D; xpp;</span><br><span class="line">            &#125;</span><br><span class="line">            else &#123;</span><br><span class="line">                &#x2F;&#x2F; xppr 不存在 or 黑色</span><br><span class="line">                if (x &#x3D;&#x3D; xp.right) &#123;</span><br><span class="line">                    root &#x3D; rotateLeft(root, x &#x3D; xp);</span><br><span class="line">                    xpp &#x3D; (xp &#x3D; x.parent) &#x3D;&#x3D; null ? null : xp.parent;</span><br><span class="line">                &#125;</span><br><span class="line">                &#x2F;&#x2F;</span><br><span class="line">                if (xp !&#x3D; null) &#123;</span><br><span class="line">                    xp.red &#x3D; false;</span><br><span class="line">                    if (xpp !&#x3D; null) &#123;</span><br><span class="line">                        xpp.red &#x3D; true;</span><br><span class="line">                        root &#x3D; rotateRight(root, xpp);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        else &#123;</span><br><span class="line">            if (xppl !&#x3D; null &amp;&amp; xppl.red) &#123;</span><br><span class="line">                xppl.red &#x3D; false;</span><br><span class="line">                xp.red &#x3D; false;</span><br><span class="line">                xpp.red &#x3D; true;</span><br><span class="line">                x &#x3D; xpp;</span><br><span class="line">            &#125;</span><br><span class="line">            else &#123;</span><br><span class="line">                if (x &#x3D;&#x3D; xp.left) &#123;</span><br><span class="line">                    root &#x3D; rotateRight(root, x &#x3D; xp);</span><br><span class="line">                    xpp &#x3D; (xp &#x3D; x.parent) &#x3D;&#x3D; null ? null : xp.parent;</span><br><span class="line">                &#125;</span><br><span class="line">                if (xp !&#x3D; null) &#123;</span><br><span class="line">                    xp.red &#x3D; false;</span><br><span class="line">                    if (xpp !&#x3D; null) &#123;</span><br><span class="line">                        xpp.red &#x3D; true;</span><br><span class="line">                        root &#x3D; rotateLeft(root, xpp);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这篇的图解很详细<br><a href="https://www.cnblogs.com/oldbai/p/9890808.html" target="_blank" rel="noopener">https://www.cnblogs.com/oldbai/p/9890808.html</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * 左旋</span><br><span class="line"> *&#x2F;</span><br><span class="line">static &lt;K,V&gt; TreeNode&lt;K,V&gt; rotateLeft(TreeNode&lt;K,V&gt; root,</span><br><span class="line">                                      TreeNode&lt;K,V&gt; p) &#123;</span><br><span class="line">    TreeNode&lt;K,V&gt; r, pp, rl;</span><br><span class="line">    if (p !&#x3D; null &amp;&amp; (r &#x3D; p.right) !&#x3D; null) &#123;</span><br><span class="line">        &#x2F;&#x2F;  --- rl 交给 pr</span><br><span class="line">        if ((rl &#x3D; p.right &#x3D; r.left) !&#x3D; null)</span><br><span class="line">            rl.parent &#x3D; pk;</span><br><span class="line">        &#x2F;&#x2F; --- pp 不存在, root &#x3D; r</span><br><span class="line">        if ((pp &#x3D; r.parent &#x3D; p.parent) &#x3D;&#x3D; null)</span><br><span class="line">            (root &#x3D; r).red &#x3D; false;</span><br><span class="line">        &#x2F;&#x2F; --- pp 指向p 的指针 指向r</span><br><span class="line">        else if (pp.left &#x3D;&#x3D; p)</span><br><span class="line">            pp.left &#x3D; r;</span><br><span class="line">        else</span><br><span class="line">            pp.right &#x3D; r;</span><br><span class="line">        &#x2F;&#x2F; --- 将p置为r的左节点</span><br><span class="line">        r.left &#x3D; p;</span><br><span class="line">        p.parent &#x3D; r;</span><br><span class="line">    &#125;</span><br><span class="line">    return root;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>缩写<br>p 父节点<br>pp 爷节点<br>r 父的右<br>rl 父的右的左节点<br>s  子节点left or right<br>单看网上旋转的结果图是很难理解的。<br>这段代码赋值后变量名的含义其实有变化。<br>自己把父子<strong>双向</strong>的引用变化过程画出来会比较清楚</p>
+<p>忽略判空的话大概是这样一个过程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; rl 交给 pr</span><br><span class="line">p.r &#x3D; rl</span><br><span class="line">rl.p &#x3D; p</span><br><span class="line">&#x2F;&#x2F; pp 指向p 的son引用 指向r</span><br><span class="line">r.p &#x3D; pp</span><br><span class="line">p.s &#x3D; r</span><br><span class="line">&#x2F;&#x2F; 最后修改r和p左旋候的父子关系</span><br><span class="line">r.l &#x3D; p</span><br><span class="line">p.p &#x3D; r</span><br></pre></td></tr></table></figure>
+<p>注意一般修改时 都是配对修改 父节点的left/right引用, 子节点的parent</p>
+<p>树化部分就基本如此</p>
+<h2 id="putTreeVal"><a href="#putTreeVal" class="headerlink" title="putTreeVal"></a>putTreeVal</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">final TreeNode&lt;K,V&gt; putTreeVal(HashMap&lt;K,V&gt; map, Node&lt;K,V&gt;[] tab,</span><br><span class="line">                               int h, K k, V v) &#123;</span><br><span class="line">    Class&lt;?&gt; kc &#x3D; null;</span><br><span class="line">    boolean searched &#x3D; false;</span><br><span class="line">    TreeNode&lt;K,V&gt; root &#x3D; (parent !&#x3D; null) ? root() : this;</span><br><span class="line">    for (TreeNode&lt;K,V&gt; p &#x3D; root;;) &#123;</span><br><span class="line">        int dir, ph; K pk;</span><br><span class="line">        if ((ph &#x3D; p.hash) &gt; h)</span><br><span class="line">            dir &#x3D; -1;</span><br><span class="line">        else if (ph &lt; h)</span><br><span class="line">            dir &#x3D; 1;</span><br><span class="line">        else if ((pk &#x3D; p.key) &#x3D;&#x3D; k || (k !&#x3D; null &amp;&amp; k.equals(pk)))</span><br><span class="line">            &#x2F;&#x2F; equals 找到相同的节点，外层赋值</span><br><span class="line">            return p;</span><br><span class="line">        else if ((kc &#x3D;&#x3D; null &amp;&amp;</span><br><span class="line">                  (kc &#x3D; comparableClassFor(k)) &#x3D;&#x3D; null) ||</span><br><span class="line">                 (dir &#x3D; compareComparables(kc, k, pk)) &#x3D;&#x3D; 0) &#123;</span><br><span class="line">            &#x2F;&#x2F; hash相等 equals不等，其中一个不是Comparable类型或者两者类型不同</span><br><span class="line">            &#x2F;&#x2F; 继续子树寻找</span><br><span class="line">            if (!searched) &#123;</span><br><span class="line">                TreeNode&lt;K,V&gt; q, ch;</span><br><span class="line">                searched &#x3D; true;</span><br><span class="line">                if (((ch &#x3D; p.left) !&#x3D; null &amp;&amp;</span><br><span class="line">                     (q &#x3D; ch.find(h, k, kc)) !&#x3D; null) ||</span><br><span class="line">                    ((ch &#x3D; p.right) !&#x3D; null &amp;&amp;</span><br><span class="line">                     (q &#x3D; ch.find(h, k, kc)) !&#x3D; null))</span><br><span class="line">                    return q;</span><br><span class="line">            &#125;</span><br><span class="line">            dir &#x3D; tieBreakOrder(k, pk);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        TreeNode&lt;K,V&gt; xp &#x3D; p;</span><br><span class="line">        if ((p &#x3D; (dir &lt;&#x3D; 0) ? p.left : p.right) &#x3D;&#x3D; null) &#123;</span><br><span class="line">            &#x2F;&#x2F; 新节点插入</span><br><span class="line">            Node&lt;K,V&gt; xpn &#x3D; xp.next;</span><br><span class="line">            TreeNode&lt;K,V&gt; x &#x3D; map.newTreeNode(h, k, v, xpn);</span><br><span class="line">            if (dir &lt;&#x3D; 0)</span><br><span class="line">                xp.left &#x3D; x;</span><br><span class="line">            else</span><br><span class="line">                xp.right &#x3D; x;</span><br><span class="line">            xp.next &#x3D; x;</span><br><span class="line">            x.parent &#x3D; x.prev &#x3D; xp;</span><br><span class="line">            if (xpn !&#x3D; null)</span><br><span class="line">                ((TreeNode&lt;K,V&gt;)xpn).prev &#x3D; x;</span><br><span class="line">            moveRootToFront(tab, balanceInsertion(root, x));</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>寻找过程其实和treeify 相似。<br>不过插入比树化多一种情况是需要判断相同key的节点。有则只需修改value</p>
+<p>find 函数则是一个递归查找过程, 也是类似的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">final TreeNode&lt;K,V&gt; find(int h, Object k, Class&lt;?&gt; kc) &#123;</span><br><span class="line">    TreeNode&lt;K,V&gt; p &#x3D; this;</span><br><span class="line">    do &#123;</span><br><span class="line">        int ph, dir; K pk;</span><br><span class="line">        TreeNode&lt;K,V&gt; pl &#x3D; p.left, pr &#x3D; p.right, q;</span><br><span class="line">        if ((ph &#x3D; p.hash) &gt; h)</span><br><span class="line">            p &#x3D; pl;</span><br><span class="line">        else if (ph &lt; h)</span><br><span class="line">            p &#x3D; pr;</span><br><span class="line">        else if ((pk &#x3D; p.key) &#x3D;&#x3D; k || (k !&#x3D; null &amp;&amp; k.equals(pk)))</span><br><span class="line">            return p;</span><br><span class="line">        else if (pl &#x3D;&#x3D; null)</span><br><span class="line">            p &#x3D; pr;</span><br><span class="line">        else if (pr &#x3D;&#x3D; null)</span><br><span class="line">            p &#x3D; pl;</span><br><span class="line">        else if ((kc !&#x3D; null ||</span><br><span class="line">                  (kc &#x3D; comparableClassFor(k)) !&#x3D; null) &amp;&amp;</span><br><span class="line">                 (dir &#x3D; compareComparables(kc, k, pk)) !&#x3D; 0)</span><br><span class="line">            &#x2F;&#x2F; 跟treeify 那个条件刚好相反。</span><br><span class="line">            &#x2F;&#x2F; hash相等 equals不等，都是Comparable类型且两者类型不同</span><br><span class="line">            &#x2F;&#x2F; 继续子树寻找</span><br><span class="line">            p &#x3D; (dir &lt; 0) ? pl : pr;</span><br><span class="line">        else if ((q &#x3D; pr.find(h, k, kc)) !&#x3D; null)</span><br><span class="line">            return q;</span><br><span class="line">        else</span><br><span class="line">            p &#x3D; pl;</span><br><span class="line">    &#125; while (p !&#x3D; null);</span><br><span class="line">    return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但最后面几个判断却并不是对称的，但本质还是递归去遍历查询</p>
+
+      
+    </div>
+    
+    
+    
+    
+      <div>
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script src="https://cdn.bootcss.com/jquery/2.0.0/jquery.min.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <p><span>本文标题:</span><a href="/articles/HashMap/">Java 数据结构源码 - HashMap</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 zpengg 的个人博客">zpengg</a></p>
+  <p><span>发布时间:</span>2020年05月11日 - 20:27</p>
+  <p><span>最后更新:</span>2020年11月25日 - 02:46</p>
+  <p><span>原始链接:</span><a href="/articles/HashMap/" title="Java 数据结构源码 - HashMap">https://zpengg.github.io/articles/HashMap/</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://zpengg.github.io/articles/HashMap/"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+      $(".fa-clipboard").click(function(){
+      clipboard.on('success', function(){
+        swal({   
+          title: "",   
+          text: '复制成功',
+          icon: "success", 
+          showConfirmButton: true
+          });
+        });
+    });  
+</script>
+
+
+      </div>
+    
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JAVA%E6%BA%90%E7%A0%81/" rel="tag"># JAVA源码</a>
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag"># 数据结构</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/articles/ArrayList/" rel="next" title="Java 数据结构源码 - ArrayList">
+                <i class="fa fa-chevron-left"></i> Java 数据结构源码 - ArrayList
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/articles/DNS/" rel="prev" title="DNS">
+                DNS <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">zpengg</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#AbstractMap"><span class="nav-number">1.</span> <span class="nav-text">AbstractMap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HashMap"><span class="nav-number">2.</span> <span class="nav-text">HashMap</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#默认值"><span class="nav-number">2.1.</span> <span class="nav-text">默认值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结构"><span class="nav-number">2.2.</span> <span class="nav-text">结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#hash值-计算"><span class="nav-number">2.2.1.</span> <span class="nav-text">hash值 计算</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#resize-扩容"><span class="nav-number">3.</span> <span class="nav-text">resize 扩容</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#处理单个节点"><span class="nav-number">3.1.</span> <span class="nav-text">处理单个节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#处理链表"><span class="nav-number">3.2.</span> <span class="nav-text">处理链表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#处理树"><span class="nav-number">3.3.</span> <span class="nav-text">处理树</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2的幂"><span class="nav-number">3.4.</span> <span class="nav-text">2的幂</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#treeify"><span class="nav-number">4.</span> <span class="nav-text">treeify</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#putTreeVal"><span class="nav-number">5.</span> <span class="nav-text">putTreeVal</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zpengg</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i>
+<span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'WqwIUMfdRmXmdQvL3LOx1RKd-gzGzoHsz',
+        appKey: '84WOyea0KjdcqaO4zacQYgYH',
+        placeholder: '交流一下吧，最好填上昵称。。',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("WqwIUMfdRmXmdQvL3LOx1RKd-gzGzoHsz", "84WOyea0KjdcqaO4zacQYgYH");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

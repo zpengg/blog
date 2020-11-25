@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="YNxNVpKWrrhCO5lB_GKkkz6TxbryIsqJHibxrzo9Amc" />
+
+
+
+  <meta name="baidu-site-verification" content="NaN" />
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="cMbiWs0H2C" />
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ELK,ElasticSearch," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="背景最初创建索引，没有特别处理。随着时间增加，时序数据的数据量会不断上升，单索引文档过多时，搜索效率会下降，而且早晚会达到分片上限。通常我们只关心最近时间的数据，时间过去越久，信息的价值就会下降。最直接的办法是就是把过期的一些文档给删除掉。 delete_by_queryscroll query&#x2F;bulk delete 同理使用这些API删除数据效率较低  We could delete the">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ES时序数据（索引生命周期管理）">
+<meta property="og:url" content="https://zpengg.github.io/articles/ES-ILM/index.html">
+<meta property="og:site_name" content="zpengg">
+<meta property="og:description" content="背景最初创建索引，没有特别处理。随着时间增加，时序数据的数据量会不断上升，单索引文档过多时，搜索效率会下降，而且早晚会达到分片上限。通常我们只关心最近时间的数据，时间过去越久，信息的价值就会下降。最直接的办法是就是把过期的一些文档给删除掉。 delete_by_queryscroll query&#x2F;bulk delete 同理使用这些API删除数据效率较低  We could delete the">
+<meta property="article:published_time" content="2020-04-12T11:31:11.000Z">
+<meta property="article:modified_time" content="2020-11-25T02:46:59.970Z">
+<meta property="article:author" content="zpengg">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="ElasticSearch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://zpengg.github.io/articles/ES-ILM/"/>
+
+
+
+
+
+  <title>ES时序数据（索引生命周期管理） | zpengg</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zpengg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">🔑 stuff i used to do 🔑</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://zpengg.github.io/articles/ES-ILM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zpengg">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zpengg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">ES时序数据（索引生命周期管理）</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-12T11:31:11+00:00">
+                2020-04-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ElasticSearch/" itemprop="url" rel="index">
+                    <span itemprop="name">ElasticSearch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/articles/ES-ILM/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/articles/ES-ILM/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/articles/ES-ILM/" class="leancloud_visitors" data-flag-title="ES时序数据（索引生命周期管理）">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.1k
+                </span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>最初创建索引，没有特别处理。<br>随着时间增加，时序数据的数据量会不断上升，单索引文档过多时，搜索效率会下降，而且早晚会达到分片上限。<br>通常我们只关心最近时间的数据，时间过去越久，信息的价值就会下降。<br>最直接的办法是就是把过期的一些文档给删除掉。</p>
+<h2 id="delete-by-query"><a href="#delete-by-query" class="headerlink" title="delete_by_query"></a>delete_by_query</h2><p>scroll query/bulk delete 同理<br><strong>使用这些API删除数据效率较低</strong></p>
+<blockquote>
+<p>We could delete the old events with a scroll query and bulk delete, but this approach is very inefficient. When you delete a document, it is only marked as deleted (see Deletes and Updates). It won’t be physically deleted until the segment containing it is merged away.</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">curl -u 用户名:密码  -H&#39;Content-Type:application&#x2F;json&#39; -d&#39;&#123;</span><br><span class="line">        &quot;query&quot;: &#123;</span><br><span class="line">                    &quot;range&quot;: &#123;</span><br><span class="line">                                    &quot;@timestamp&quot;: &#123;</span><br><span class="line">                                                        &quot;lt&quot;: &quot;now-7d&quot;,</span><br><span class="line">                                                                            &quot;format&quot;: &quot;epoch_millis&quot;</span><br><span class="line">                                                                                            &#125;</span><br><span class="line">                                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#39; -XPOST &quot;http:&#x2F;&#x2F;127.0.0.1:9200&#x2F;*-*&#x2F;_delete_by_query?pretty&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="如何合理管理时间序列数据"><a href="#如何合理管理时间序列数据" class="headerlink" title="如何合理管理时间序列数据"></a>如何合理管理时间序列数据</h2><p>2.x 的文档是这样说的<br><a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/time-based.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/elasticsearch/guide/current/time-based.html</a><br>文档中提到应该为索引建立别名</p>
+<p>输入数据的业务系统用统一的别名,不用在修改索引时间切分方法时修改。<br>别名指向带时间后缀分割的实际索引名<br>*_YYYY-MM-dd</p>
+<p>然后定期更新</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">POST &#x2F;_aliases</span><br><span class="line">&#123;</span><br><span class="line">      &quot;actions&quot;: [</span><br><span class="line">              &#123; &quot;add&quot;:    &#123; &quot;alias&quot;: &quot;logs_current&quot;,  &quot;index&quot;: &quot;logs_2014-10&quot; &#125;&#125;, </span><br><span class="line">              &#123; &quot;remove&quot;: &#123; &quot;alias&quot;: &quot;logs_current&quot;,  &quot;index&quot;: &quot;logs_2014-09&quot; &#125;&#125;, </span><br><span class="line">                  &#123; &quot;add&quot;:    &#123; &quot;alias&quot;: &quot;last_3_months&quot;, &quot;index&quot;: &quot;logs_2014-10&quot; &#125;&#125;, </span><br><span class="line">                      &#123; &quot;remove&quot;: &#123; &quot;alias&quot;: &quot;last_3_months&quot;, &quot;index&quot;: &quot;logs_2014-07&quot; &#125;&#125;  </span><br><span class="line">        ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外也要提前建好索引模版,这样指向新index时,就不必重复设置 </p>
+<h2 id="7-x下的索引生命周期管理-ILM"><a href="#7-x下的索引生命周期管理-ILM" class="headerlink" title="7.x下的索引生命周期管理 ILM"></a>7.x下的索引生命周期管理 ILM</h2><p>现在使用的时7.4版本。<br>先说明几个操作概念</p>
+<ul>
+<li>rollover 重定向别名，跟上面说的基本一致</li>
+<li>shrink 减少一个索引中用到的主分片数量 </li>
+<li>force merge 合并分片中的 分段segment 释放空间</li>
+<li>freeze 变成只读</li>
+<li>delete 删除 永久移除一个索引</li>
+</ul>
+<h3 id="关联-生命周期策略，到-索引模版"><a href="#关联-生命周期策略，到-索引模版" class="headerlink" title="关联 生命周期策略，到 索引模版"></a>关联 生命周期策略，到 索引模版</h3><p>ILM 提供一种 冷热分离结构<br>有hot-warm-cold-delet 四个阶段</p>
+<h3 id="使用ILM主要有四个步骤"><a href="#使用ILM主要有四个步骤" class="headerlink" title="使用ILM主要有四个步骤"></a>使用ILM主要有四个步骤</h3><ol>
+<li>创建策略 定义什么阶段 有什么动作。</li>
+<li>创建模板关联索引</li>
+<li>初始化第一个写索引</li>
+<li>验证索引是否如期移动/删除</li>
+</ol>
+<h2 id="rollover-如何命名"><a href="#rollover-如何命名" class="headerlink" title="rollover 如何命名"></a>rollover 如何命名</h2><p>初始化索引按照【”-”+数字】的形式结尾）<br>rollover新创建的索引数字+1，es自动在前面以0补齐至6位数字<br>执行rollover后，别名logs的写指向最新索引，查询指向所有rollover下的索引。</p>
+<h2 id="自动rollover"><a href="#自动rollover" class="headerlink" title="自动rollover"></a>自动rollover</h2><p>有些博客提到要定时持续调用 _rollover 接口<br>我以max_docs:2 测试过，插入3条数据时是不会马上触发rollover的<br>但等个（默认）10 分钟后再看，发觉是会自动rollover了 (v7.4)<br>    可以在集群设置里修改</p>
+<h2 id="将原有索引加入生命周期管理"><a href="#将原有索引加入生命周期管理" class="headerlink" title="将原有索引加入生命周期管理"></a>将原有索引加入生命周期管理</h2><p>将新数据写入到新的ILM管理的索引中<br>老索引可以通过应用另外的过期策略，主动过期<br>也可以通过reindex加入到新索引，但此时会混合新旧数据到同一索引中，直到满足了新策略</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>1.所有索引必需有别名。相当于接口。<br>    可以避免写入方频繁修改。<br>    可以通过切换写索引，来对索引的一些设置mapping等进行修改。</p>
+<p>2.新建的时序数据的索引，无论大小都可以尽量使用ILM去管理。<br>    小数据量的可以根据max_docs 去配置<br>    大数据量的可以按时间去配置。</p>
+<p>3.有些配置数据，失效时间未必与插入文档的时间有明确的关系。比如活动排期此类非时序的配置。<br>    可以根据业务逻辑设定长一点的过期时间<br>    数据量特别少的话直接用别名管理也可以,日后有需要再加ILM。</p>
+
+      
+    </div>
+    
+    
+    
+    
+      <div>
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script src="https://cdn.bootcss.com/jquery/2.0.0/jquery.min.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <p><span>本文标题:</span><a href="/articles/ES-ILM/">ES时序数据（索引生命周期管理）</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 zpengg 的个人博客">zpengg</a></p>
+  <p><span>发布时间:</span>2020年04月12日 - 11:31</p>
+  <p><span>最后更新:</span>2020年11月25日 - 02:46</p>
+  <p><span>原始链接:</span><a href="/articles/ES-ILM/" title="ES时序数据（索引生命周期管理）">https://zpengg.github.io/articles/ES-ILM/</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://zpengg.github.io/articles/ES-ILM/"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+      $(".fa-clipboard").click(function(){
+      clipboard.on('success', function(){
+        swal({   
+          title: "",   
+          text: '复制成功',
+          icon: "success", 
+          showConfirmButton: true
+          });
+        });
+    });  
+</script>
+
+
+      </div>
+    
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ELK/" rel="tag"># ELK</a>
+          
+            <a href="/tags/ElasticSearch/" rel="tag"># ElasticSearch</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/articles/vueAutoAddGetSetMethod/" rel="next" title="vue 自动添加 get/set 方法的时机">
+                <i class="fa fa-chevron-left"></i> vue 自动添加 get/set 方法的时机
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/articles/regAddNumberComma/" rel="prev" title="JS正则表达式,数字千分位补逗号">
+                JS正则表达式,数字千分位补逗号 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">zpengg</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#delete-by-query"><span class="nav-number">2.</span> <span class="nav-text">delete_by_query</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何合理管理时间序列数据"><span class="nav-number">3.</span> <span class="nav-text">如何合理管理时间序列数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-x下的索引生命周期管理-ILM"><span class="nav-number">4.</span> <span class="nav-text">7.x下的索引生命周期管理 ILM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#关联-生命周期策略，到-索引模版"><span class="nav-number">4.1.</span> <span class="nav-text">关联 生命周期策略，到 索引模版</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用ILM主要有四个步骤"><span class="nav-number">4.2.</span> <span class="nav-text">使用ILM主要有四个步骤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rollover-如何命名"><span class="nav-number">5.</span> <span class="nav-text">rollover 如何命名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自动rollover"><span class="nav-number">6.</span> <span class="nav-text">自动rollover</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将原有索引加入生命周期管理"><span class="nav-number">7.</span> <span class="nav-text">将原有索引加入生命周期管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zpengg</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i>
+<span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'WqwIUMfdRmXmdQvL3LOx1RKd-gzGzoHsz',
+        appKey: '84WOyea0KjdcqaO4zacQYgYH',
+        placeholder: '交流一下吧，最好填上昵称。。',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("WqwIUMfdRmXmdQvL3LOx1RKd-gzGzoHsz", "84WOyea0KjdcqaO4zacQYgYH");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

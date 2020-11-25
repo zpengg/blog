@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="YNxNVpKWrrhCO5lB_GKkkz6TxbryIsqJHibxrzo9Amc" />
+
+
+
+  <meta name="baidu-site-verification" content="NaN" />
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="cMbiWs0H2C" />
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ELK,ElasticSearch,Kibana,ES," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="新安排的项目需要用到ElasticSearch作为数据存储和聚合分析, 官方的文档还是很详细的。虽然我觉得官方的client也挺好用的,但项目需要用到ESSQL,所以特别关注了这块的一些点。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ElasticSearch基本概念&amp;常见问题">
+<meta property="og:url" content="https://zpengg.github.io/articles/ES%E8%B0%83%E7%A0%94/index.html">
+<meta property="og:site_name" content="zpengg">
+<meta property="og:description" content="新安排的项目需要用到ElasticSearch作为数据存储和聚合分析, 官方的文档还是很详细的。虽然我觉得官方的client也挺好用的,但项目需要用到ESSQL,所以特别关注了这块的一些点。">
+<meta property="og:image" content="http://zpengg.oss-cn-shenzhen.aliyuncs.com/ca2accf57de7ad4b7f99a97e8c857790.png">
+<meta property="og:image" content="http://zpengg.oss-cn-shenzhen.aliyuncs.com/613e47cdc9ae1215e9bcbdcf162ffd25.png">
+<meta property="og:image" content="http://zpengg.oss-cn-shenzhen.aliyuncs.com/c04d0cd995c0088b454e164c88ca9798.png">
+<meta property="article:published_time" content="2020-02-17T23:28:13.000Z">
+<meta property="article:modified_time" content="2020-11-25T02:46:59.970Z">
+<meta property="article:author" content="zpengg">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="ElasticSearch">
+<meta property="article:tag" content="Kibana">
+<meta property="article:tag" content="ES">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zpengg.oss-cn-shenzhen.aliyuncs.com/ca2accf57de7ad4b7f99a97e8c857790.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://zpengg.github.io/articles/ES调研/"/>
+
+
+
+
+
+  <title>ElasticSearch基本概念&常见问题 | zpengg</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zpengg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">🔑 stuff i used to do 🔑</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://zpengg.github.io/articles/ES%E8%B0%83%E7%A0%94/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zpengg">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zpengg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">ElasticSearch基本概念&常见问题</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-17T23:28:13+00:00">
+                2020-02-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ElasticSearch/" itemprop="url" rel="index">
+                    <span itemprop="name">ElasticSearch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/articles/ES%E8%B0%83%E7%A0%94/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/articles/ES%E8%B0%83%E7%A0%94/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/articles/ES%E8%B0%83%E7%A0%94/" class="leancloud_visitors" data-flag-title="ElasticSearch基本概念&常见问题">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.4k
+                </span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>新安排的项目需要用到ElasticSearch作为数据存储和聚合分析, 官方的文档还是很详细的。<br>虽然我觉得官方的client也挺好用的,但项目需要用到ESSQL,所以特别关注了这块的一些点。  </p>
+<a id="more"></a>
+<h2 id="ELK"><a href="#ELK" class="headerlink" title="ELK"></a>ELK</h2><p>Elastic Stack(ELk) 相关产品</p>
+<ul>
+<li>Elasticsearch 一个基于JSON的分布式搜索和分析引擎</li>
+<li>Kibana 可视化、一个可扩展的用户界面</li>
+<li>Beats 采集数据工具</li>
+<li>Logstash 第三方数据库中提取数据</li>
+</ul>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>  集群<br>  节点<br>  类型type<br>  文档doc<br>  索引index<br>  分片shard<br>  副本replica  </p>
+<h3 id="index-type-doc"><a href="#index-type-doc" class="headerlink" title="index/type/doc"></a>index/type/doc</h3><p>类比<br>ES：indices –&gt; types –&gt; documents –&gt; fields<br>DB：databases –&gt; tables –&gt; rows –&gt; columns  </p>
+<p>documents为JSON形式  </p>
+<h3 id="分片shard"><a href="#分片shard" class="headerlink" title="分片shard"></a>分片shard</h3><p>需要配置一个主分片数量，并永不再改变<br>默认设置5个主分片<br>ES 的每个分片（shard）都是lucene的一个index，而lucene的一个index只能存储20亿个文档，所以一个分片也只能最多存储20亿个文档。  </p>
+<p>分片选择公式<br>shard = hash(routing) % number_of_primary_shards<br>routing 默认为文档id  </p>
+<p>分片数过多会导致：<br>1、  会导致打开比较多的文件<br>2、  分片是存储在不同机器上的，分片数越多，机器之间的交互也就越多；  </p>
+<p>分片数太少导致：<br>单个分片索引过大，降低整体的检索速率  </p>
+<p>将单个分片存储存储索引数据的大小控制在20G左右；绝对不要超过50G ， 否则性能很差<br>最终分片数量 = 数据总量/20G  </p>
+<h3 id="副本replica"><a href="#副本replica" class="headerlink" title="副本replica"></a>副本replica</h3><p>主分片不可用时，集群选择副本提升为主分片。<br>ES禁止同一分片的主分片,副本在同一个节点上。<br>比如两个节点其中 node1 有某个索引的分片1、2、3和副本分片4、5，node2 有该索引的分片4、5和副本分片1、2、3。<br>replication 配置 默认为sync，即修改完成后，同步到其他节点后，才返回结果到客户端。  </p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>trie字典树: 根据前缀快速找到单词。<br>倒排索引: 将doc分词后倒过来建立索引 词value -&gt; key(docId) -&gt; doc<br>索引缓存在内存中  </p>
+<h2 id="安装Elastic-Search"><a href="#安装Elastic-Search" class="headerlink" title="安装Elastic Search"></a>安装Elastic Search</h2><p>启动脚本需要java8, 但101.3 java7？  </p>
+<p>下载地址 elasticsearch.org/download  </p>
+<p>elasticsearch/bin/elasticsearch 脚本运行  </p>
+<p>提供两个端口进行访问  </p>
+<ul>
+<li>9300 java API</li>
+<li>9200 http RESTful API</li>
+</ul>
+<p>浏览器127.0.0.1:9200 访问后可以看到<br><img src="http://zpengg.oss-cn-shenzhen.aliyuncs.com/ca2accf57de7ad4b7f99a97e8c857790.png" alt=""><br>即运行成功, 节点版本为5.6.4。 开发时要选择匹配的版本的客户端进行请求。</p>
+<h3 id="Kibana"><a href="#Kibana" class="headerlink" title="Kibana"></a>Kibana</h3><p>kibana 默认端口5601 </p>
+<p>kibana 可使用devTools<br>可使用以下格式测试请求<br>      GET /megacorp/employee/_search</p>
+<h2 id="JAVA-客户端"><a href="#JAVA-客户端" class="headerlink" title="JAVA 客户端"></a>JAVA 客户端</h2><p>ES Java 客户端目前主要提供两种方式，分别是 Java API 和 Java REST Client：  </p>
+<p>Java API：<a href="https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/index.html，其使用的核心传输对象是" target="_blank" rel="noopener">https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/index.html，其使用的核心传输对象是</a> TransportClient。但是 Elastic 官方已经计划在 Elasticsearch 7.0 中废弃 TransportClient，并在 8.0 中完全移除它，并由 Java High Level REST Client 代替。官网声明如下：<a href="https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/client.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/client.html</a>  </p>
+<p>Java REST Client：<a href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/index.html，Java" target="_blank" rel="noopener">https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/index.html，Java</a> REST Client 又分为两种，Java Low Level REST Client 和 Java High Level REST Client。目前官方推荐使用 Java High Level REST Client。  </p>
+<p>目前有flummi、Jest、还有国人开发的bboss。非官方封装的client。<br>但更推荐使用官方支持的 Java High Level REST Client、或者spring-data-elasticsearch。  </p>
+<p>spring-data-elasticsearch, 复杂的mapping可以自动完成，无需额外创建mapping。但版本要与spring版本匹配.  </p>
+<p>所以使用Java High Level REST Client 更为合适。  </p>
+<p>另附5.6的文档<br>      <a href="https://artifacts.elastic.co/javadoc/org/elasticsearch/client/elasticsearch-rest-high-level-client/5.6.16/index.html" target="_blank" rel="noopener">API</a><br>      <a href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/5.6/java-rest-high-document-get.html" target="_blank" rel="noopener">请求示例</a>  </p>
+<h2 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h2><p>通过HTTP方法GET来检索文档，同样的，我们可以使用DELETE方法删除文档，使用HEAD方法检查某文档是否存在。如果想更新已存在的文档，我们只需再PUT一次。  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">POST &#x2F;index&#x2F;type&#x2F;xxx 创建</span><br><span class="line">DELETE &#x2F;index&#x2F;type&#x2F;xxx 删除</span><br><span class="line">PUT &#x2F;index&#x2F;type&#x2F;xxx 更新或创建</span><br><span class="line">GET &#x2F;index&#x2F;type&#x2F;xxx 查看</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>相应的JAVA中提供的API包含了检查存在exist，增index/create、删 delete、改index/update、查search。并提供带Async后缀的异步API。批量操作，查询ES基础信息等API</p>
+</blockquote>
+<h3 id="插入index-create"><a href="#插入index-create" class="headerlink" title="插入index/create"></a>插入index/create</h3><p>第一步判断是确定插入的文档是否指定id，如果没有指定id，系统会默认生成一个唯一id。这种情况下，不管index还是create会直接add文档。如果用户指定了id，那么就会走底层Lucene update，成本比Lucene add要高。  </p>
+<p>第二步判断，是通过id来get文档版本号检查是否冲突，但无论是index还是create都不会get整个doc的全部内容，只是get出了版号。这也从一定程度上减少了系统开销。</p>
+<p>index时会检查_version。如果插入时没有指定_version，那对于已有的doc，_version会递增，并对文档覆盖。插入时如果指定_version，如果与已有的文档_version不相等，则插入失败，如果相等则覆盖，_version递增。  </p>
+<p>create使用内部版本控制，传入_version会冲突  </p>
+<h3 id="更新update"><a href="#更新update" class="headerlink" title="更新update"></a>更新update</h3><p>底层Lucene update 实际上是先删除后创建,性能也比 Lucene add 差。<br>Es update都会调用 InternalEngine中的get方法，来获取整个文档信息，从而实现针对特定字段进行修改，这也就导致了每次更新要获取一遍原始文档，性能上会有很大影响。所以根据使用场景，有时候使用index会比update好很多。  </p>
+<h3 id="搜索search"><a href="#搜索search" class="headerlink" title="搜索search"></a>搜索search</h3><h4 id="简单搜索"><a href="#简单搜索" class="headerlink" title="简单搜索"></a>简单搜索</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET &#x2F;megacorp&#x2F;employee&#x2F;_search</span><br></pre></td></tr></table></figure>
+<p>不加条件，默认返回前10条</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">   &quot;took&quot;:      6,</span><br><span class="line">   &quot;timed_out&quot;: false,</span><br><span class="line">   &quot;_shards&quot;: &#123; ... &#125;,</span><br><span class="line">   &quot;hits&quot;: &#123;</span><br><span class="line">      &quot;total&quot;:      3,</span><br><span class="line">      &quot;max_score&quot;:  1,</span><br><span class="line">      &quot;hits&quot;: [</span><br><span class="line">         &#123;</span><br><span class="line">            &quot;_index&quot;:         &quot;megacorp&quot;,</span><br><span class="line">            &quot;_type&quot;:          &quot;employee&quot;,</span><br><span class="line">            &quot;_id&quot;:            &quot;3&quot;,</span><br><span class="line">            &quot;_score&quot;:         1,</span><br><span class="line">            &quot;_source&quot;: &#123;</span><br><span class="line">               &quot;first_name&quot;:  &quot;Douglas&quot;,</span><br><span class="line">               &quot;last_name&quot;:   &quot;Fir&quot;,</span><br><span class="line">               &quot;age&quot;:         35,</span><br><span class="line">               &quot;about&quot;:       &quot;I like to build cabinets&quot;,</span><br><span class="line">               &quot;interests&quot;: [ &quot;forestry&quot; ]</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;,</span><br><span class="line">         &#123;</span><br><span class="line">            ...</span><br><span class="line">         &#125;,</span><br><span class="line">         &#123;</span><br><span class="line">            ...</span><br><span class="line">         &#125;</span><br><span class="line">      ]</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>查询语句可以附带参数 q=fieldName:xxx</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET &#x2F;megacorp&#x2F;employee&#x2F;_search?q&#x3D;fieldName:xxx</span><br></pre></td></tr></table></figure>
+<h4 id="DSL-语句查询"><a href="#DSL-语句查询" class="headerlink" title="DSL 语句查询"></a>DSL 语句查询</h4><p>term：查询某个字段里含有某个关键词的文档, 只能查单个词<br>terms：查询某个字段里含有多个关键词的文档, 多个词 或关系<br>match: 知道分词器的存在，会对field进行分词操作，然后再查询<br>match_phrase: 短语搜索，要求所有的分词同时出现在文档中，位置紧邻。<br>…<br>可以查看<a href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/5.6/java-rest-high-query-builders.html" target="_blank" rel="noopener">更多查询</a>  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GET &#x2F;megacorp&#x2F;employee&#x2F;_search</span><br><span class="line">&#123;</span><br><span class="line">    &quot;query&quot; : &#123;</span><br><span class="line">        &quot;match&quot; : &#123;</span><br><span class="line">            &quot;last_name&quot; : &quot;Smith&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">GET &#x2F;megacorp&#x2F;employee&#x2F;_search</span><br><span class="line">&#123;</span><br><span class="line">    &quot;query&quot; : &#123;</span><br><span class="line">        &quot;filtered&quot; : &#123;</span><br><span class="line">            &quot;filter&quot; : &#123;</span><br><span class="line">                &quot;range&quot; : &#123;</span><br><span class="line">                    &quot;age&quot; : &#123; &quot;gt&quot; : 30 &#125; &lt;1&gt;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;query&quot; : &#123;</span><br><span class="line">                &quot;match&quot; : &#123;</span><br><span class="line">                    &quot;last_name&quot; : &quot;smith&quot; &lt;2&gt;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="全文搜索"><a href="#全文搜索" class="headerlink" title="全文搜索"></a>全文搜索</h4><p>会同时返回 含相关字段的结果 和 相关性评分   </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">GET &#x2F;megacorp&#x2F;employee&#x2F;_search</span><br><span class="line">&#123;</span><br><span class="line">    &quot;query&quot; : &#123;</span><br><span class="line">        &quot;match&quot; : &#123;</span><br><span class="line">            &quot;about&quot; : &quot;rock climbing&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">   ...</span><br><span class="line">   &quot;hits&quot;: &#123;</span><br><span class="line">      &quot;total&quot;:      2,</span><br><span class="line">      &quot;max_score&quot;:  0.16273327,</span><br><span class="line">      &quot;hits&quot;: [</span><br><span class="line">         &#123;</span><br><span class="line">            ...</span><br><span class="line">            &quot;_score&quot;:         0.16273327, &lt;1&gt;</span><br><span class="line">            &quot;_source&quot;: &#123;</span><br><span class="line">               &quot;first_name&quot;:  &quot;John&quot;,</span><br><span class="line">               &quot;last_name&quot;:   &quot;Smith&quot;,</span><br><span class="line">               &quot;age&quot;:         25,</span><br><span class="line">               &quot;about&quot;:       &quot;I love to go rock climbing&quot;,</span><br><span class="line">               &quot;interests&quot;: [ &quot;sports&quot;, &quot;music&quot; ]</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;,</span><br><span class="line">         &#123;</span><br><span class="line">            ...</span><br><span class="line">            &quot;_score&quot;:         0.016878016, &lt;2&gt;</span><br><span class="line">            &quot;_source&quot;: &#123;</span><br><span class="line">               &quot;first_name&quot;:  &quot;Jane&quot;,</span><br><span class="line">               &quot;last_name&quot;:   &quot;Smith&quot;,</span><br><span class="line">               &quot;age&quot;:         32,</span><br><span class="line">               &quot;about&quot;:       &quot;I like to collect rock albums&quot;,</span><br><span class="line">               &quot;interests&quot;: [ &quot;music&quot; ]</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line">      ]</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="聚合"><a href="#聚合" class="headerlink" title="聚合"></a>聚合</h3><p>分为以下几种：<br>指标聚合 Metrics Aggregation: 需要计算指标的,如平均值、最大最小值<br>桶聚合 Bucket Aggregation: 给定边界，数据落入不同分类的桶中  </p>
+<p>管道聚合（v5.6是实验性） Pineline Aggregation：将其他聚合结果基础上进行聚合 比如 每月 sum（sell）之后求 max<br>矩阵聚合（实验性）  </p>
+<p>桶聚合的结果，每个桶代表一组文档，因此桶聚合可以嵌套对里面的数据进行聚合<br>除了矩阵聚合，其他几种都可以加上脚本简单计算（相当于自定义指标）  </p>
+<blockquote>
+<p>5.x后对排序，聚合这些操作用单独的数据结构(fielddata)缓存到内存里了，需要单独开启，官方解释在此<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/fielddata.html" target="_blank" rel="noopener">fielddata</a></p>
+</blockquote>
+<blockquote>
+<p>text类型的字段是要分词的, 默认不能作为field字段作为聚合用。Fielddata is disabled on text fields by default</p>
+</blockquote>
+<h3 id="java-RestHighLevelClient-请求示例"><a href="#java-RestHighLevelClient-请求示例" class="headerlink" title="java RestHighLevelClient 请求示例"></a>java RestHighLevelClient 请求示例</h3><p>查询请求模版  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;构造查询请求</span><br><span class="line">SearchRequest searchRequest &#x3D; new SearchRequest(); </span><br><span class="line">SearchSourceBuilder searchSourceBuilder &#x3D; new SearchSourceBuilder(); </span><br><span class="line">searchSourceBuilder.query(QueryBuilders.matchAllQuery()); </span><br><span class="line">searchRequest.source(searchSourceBuilder); </span><br><span class="line">&#x2F;&#x2F;查询</span><br><span class="line">SearchResponse resp &#x3D; client.search(searchRequest);</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 插入等有类似IndexRequest 不再列举。</span><br></pre></td></tr></table></figure>
+
+<p>聚合请求<br><img src="http://zpengg.oss-cn-shenzhen.aliyuncs.com/613e47cdc9ae1215e9bcbdcf162ffd25.png" alt="agg"><br>请求结果<br><img src="http://zpengg.oss-cn-shenzhen.aliyuncs.com/c04d0cd995c0088b454e164c88ca9798.png" alt="aggResult"></p>
+<h2 id="ES-SQL"><a href="#ES-SQL" class="headerlink" title="ES SQL"></a>ES SQL</h2><p>以上提到的，是dsl语句查询。<br>另有兼容sql的查询方法，但目前与目前测试机器上的版本不匹配。<br>5.x需要安装相关<a href="https://www.jianshu.com/p/b4032a7e5497" target="_blank" rel="noopener">插件</a></p>
+<p>V6.3开始官方提供sql查询，但有取消的可能。<br>SQL 特性是 xpack 的免费功能，语法为直接把sql语句从query传入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">POST &#x2F;_xpack&#x2F;sql?format&#x3D;txt</span><br><span class="line">&#123;</span><br><span class="line">        &quot;query&quot;: &quot;SELECT * FROM twitter&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>v7.5 导入默认数据，请求url 有所变更  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">POST _sql?format&#x3D;txt</span><br><span class="line">&#123;</span><br><span class="line">      &quot;query&quot;:&quot;SELECT COUNT(*), MONTH_OF_YEAR(order_date) AS month_of_year, AVG(products.min_price) AS avg_price FROM kibana_sample_data_ecommerce GROUP BY month_of_year&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.5/sql-limitations.html" target="_blank" rel="noopener">官方提到的SQL限制</a></p>
+</blockquote>
+<h2 id="如何处理join"><a href="#如何处理join" class="headerlink" title="如何处理join"></a>如何处理join</h2><p>这篇文章说得比较详细了<br><a href="https://blog.csdn.net/laoyang360/article/details/88784748" target="_blank" rel="noopener">https://blog.csdn.net/laoyang360/article/details/88784748</a></p>
+
+      
+    </div>
+    
+    
+    
+    
+      <div>
+        
+
+      </div>
+    
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ELK/" rel="tag"># ELK</a>
+          
+            <a href="/tags/ElasticSearch/" rel="tag"># ElasticSearch</a>
+          
+            <a href="/tags/Kibana/" rel="tag"># Kibana</a>
+          
+            <a href="/tags/ES/" rel="tag"># ES</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/articles/KMP/" rel="next" title="3.1 Implement strStr()">
+                <i class="fa fa-chevron-left"></i> 3.1 Implement strStr()
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/articles/BinarySearch/" rel="prev" title="BinarySearch">
+                BinarySearch <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">zpengg</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ELK"><span class="nav-number">1.</span> <span class="nav-text">ELK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#概念"><span class="nav-number">2.</span> <span class="nav-text">概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#index-type-doc"><span class="nav-number">2.1.</span> <span class="nav-text">index&#x2F;type&#x2F;doc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分片shard"><span class="nav-number">2.2.</span> <span class="nav-text">分片shard</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#副本replica"><span class="nav-number">2.3.</span> <span class="nav-text">副本replica</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原理"><span class="nav-number">3.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Elastic-Search"><span class="nav-number">4.</span> <span class="nav-text">安装Elastic Search</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kibana"><span class="nav-number">4.1.</span> <span class="nav-text">Kibana</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JAVA-客户端"><span class="nav-number">5.</span> <span class="nav-text">JAVA 客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本操作"><span class="nav-number">6.</span> <span class="nav-text">基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#插入index-create"><span class="nav-number">6.1.</span> <span class="nav-text">插入index&#x2F;create</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更新update"><span class="nav-number">6.2.</span> <span class="nav-text">更新update</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#搜索search"><span class="nav-number">6.3.</span> <span class="nav-text">搜索search</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#简单搜索"><span class="nav-number">6.3.1.</span> <span class="nav-text">简单搜索</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DSL-语句查询"><span class="nav-number">6.3.2.</span> <span class="nav-text">DSL 语句查询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#全文搜索"><span class="nav-number">6.3.3.</span> <span class="nav-text">全文搜索</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#聚合"><span class="nav-number">6.4.</span> <span class="nav-text">聚合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java-RestHighLevelClient-请求示例"><span class="nav-number">6.5.</span> <span class="nav-text">java RestHighLevelClient 请求示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ES-SQL"><span class="nav-number">7.</span> <span class="nav-text">ES SQL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何处理join"><span class="nav-number">8.</span> <span class="nav-text">如何处理join</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zpengg</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i>
+<span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'WqwIUMfdRmXmdQvL3LOx1RKd-gzGzoHsz',
+        appKey: '84WOyea0KjdcqaO4zacQYgYH',
+        placeholder: '交流一下吧，最好填上昵称。。',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("WqwIUMfdRmXmdQvL3LOx1RKd-gzGzoHsz", "84WOyea0KjdcqaO4zacQYgYH");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
